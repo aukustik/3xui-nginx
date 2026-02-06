@@ -3,40 +3,33 @@ services:
     image: ${XUI_IMAGE:-ghcr.io/mhsanaei/3x-ui:v2.8.9}
     container_name: 3x-ui
     restart: unless-stopped
+    networks:
+      - xui-network
     expose:
-      - "2053"  # WebUI
-      - "443"   # TLS
-      - "80"    # XHTTP
+      - "2053"
+      - "443"
+      - "80"
     volumes:
-#      - ${XUI_DB_PATH:-./data/x-ui.db}:/etc/x-ui/x-ui.db
-      # SSL certificates (uncomment for production)
-      - ${SSL_CERTS_PATH:-./certs}:/etc/x-ui/certs:ro
-    environment:
-      - XUI_DB_PATH=/etc/x-ui/x-ui.db
+      - ./data:/etc/x-ui
+      - ${SSL_CERTS_PATH}:/etc/x-ui/certs:ro
 
   nginx:
     image: ${NGINX_IMAGE:-nginx:alpine}
     container_name: nginx
     restart: unless-stopped
+    networks:
+      - xui-network
     ports:
-      - "${NGINX_HTTP_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
-      - "8080:8080"   # WebUI HTTPS
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
     volumes:
-      - ${NGINX_CONF_PATH:-./nginx.conf}:/etc/nginx/nginx.conf:ro
-      - ${NGINX_CONFD_PATH:-./conf.d}:/etc/nginx/conf.d:ro
-      - ${SSL_CERTS_PATH:-./certs}:/etc/letsencrypt:ro
-      - ${SSL_CERTS_PATH:-./certs}/webroot:/var/www/certbot:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./conf.d:/etc/nginx/conf.d:ro
+      - ${SSL_CERTS_PATH}:/etc/ssl/certs:ro
     depends_on:
       - 3x-ui
 
-  acme:
-    image: neilpang/acme.sh:latest
-    container_name: acme
-    restart: unless-stopped
-    volumes:
-      - ${SSL_CERTS_PATH:-./certs}/acme.sh:/acme.sh
-      - ${SSL_CERTS_PATH:-./certs}/webroot:/var/www/certbot
-    environment:
-      - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do /acme.sh/acme.sh --cron --home /acme.sh; sleep 12h & wait $${!}; done;'"
+networks:
+  xui-network:
+    driver: bridge

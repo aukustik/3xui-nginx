@@ -1,73 +1,147 @@
 # 3X-UI + Nginx Docker Compose
 
-## Структура
-```
-.
-├── .env                    # Параметры окружения
-├── docker-compose.yml      # Docker Compose конфигурация
-├── nginx.conf              # Основной конфиг Nginx
-├── conf.d/
-│   ├── acme-challenge.conf # ACME challenge для Let's Encrypt
-│   ├── 3x-ui.conf         # HTTP reverse proxy для WebUI
-│   └── stream/
-│       └── 3x-ui-stream.conf  # Stream proxy для TLS/XHTTP
-├── scripts/
-│   └── init-certbot.sh    # Скрипт для получения сертификата
-├── data/
-│   └── x-ui.db            # База 3X-UI (создается автоматически)
-└── certs/                 # SSL сертификаты Let's Encrypt
+Простой и гибкий деплой 3X-UI с Nginx reverse proxy для Ubuntu 24.04.
+
+## Архитектура
+
+- **Порт 8080**: WebUI 3X-UI с SSL (внутри контейнера на 2053)
+- **Порт 80**: XHTTP транспорт для прокси
+- **Порт 443**: TLS транспорт для VLESS-Reality (raw TCP passthrough)
+
+## Быстрый старт
+
+### 1. Подготовка сертификатов
+
+Убедитесь, что SSL сертификаты лежат на хосте:
+```bash
+/root/3xui-nginx/certs/live/your-domain.com/
+├── fullchain.pem
+└── privkey.pem
 ```
 
-## Использование
+### 2. Настройка
 
-### 1. Настройка параметров
 Отредактируйте `.env`:
 ```bash
-CERTBOT_EMAIL=your-email@example.com
-CERTBOT_DOMAIN=your-domain.com
+DOMAIN=your-domain.com
+SSL_CERTS_PATH=/root/3xui-nginx/certs/live/your-domain.com
 ```
 
-### 2. Запуск
+### 3. Запуск
+
 ```bash
+# Создать директорию для данных
+mkdir -p data
+
+# Запустить
 docker compose up -d
+
+# Проверить логи
+docker compose logs -f
 ```
 
-### 3. Получение SSL сертификата
-```bash
-./scripts/init-certbot.sh
+### 4. Доступ к WebUI
+
+Откройте в браузере: `https://your-domain.com:8080`
+
+Логин по умолчанию: `admin` / `admin`
+
+## Структура проекта
+
+```
+.
+├── .env                          # Параметры окружения
+├── docker-compose.yml            # Docker Compose конфигурация
+├── nginx.conf                    # Основной конфиг Nginx
+├── conf.d/
+│   ├── 00-acme-challenge.conf   # HTTP порт 80 → XHTTP
+│   ├── 3x-ui.conf               # HTTPS порт 8080 → WebUI
+│   └── stream/
+│       ├── 3x-ui-stream.conf    # TCP порт 443 → TLS/Reality
+│       └── README.md            # Примеры доп. транспортов
+└── data/                         # База данных 3X-UI
 ```
 
-### 4. Обновление конфига nginx
-Замените `example.com` в [`conf.d/3x-ui.conf`](conf.d/3x-ui.conf:23) на ваш домен:
-```bash
-sed -i 's/example.com/your-domain.com/g' conf.d/3x-ui.conf
+## Добавление транспортов
+
+### Пример: добавить WebSocket на порту 2096
+
+1. Создайте файл `conf.d/stream/websocket.conf`:
+```nginx
+upstream xui_ws {
+    server 3x-ui:2096;
+}
+
+server {
+    listen 2096;
+    proxy_pass xui_ws;
+    proxy_timeout 1d;
+}
 ```
 
-### 5. Перезапуск nginx
+2. Откройте порт в `docker-compose.yml`:
+```yaml
+nginx:
+  ports:
+    - "2096:2096"
+```
+
+3. Перезапустите:
 ```bash
 docker compose restart nginx
 ```
 
-### Остановка
+Больше примеров в [`conf.d/stream/README.md`](conf.d/stream/README.md)
+
+## Управление
+
 ```bash
+# Остановить
 docker compose down
+
+# Перезапустить
+docker compose restart
+
+# Обновить образы
+docker compose pull
+docker compose up -d
+
+# Просмотр логов
+docker compose logs -f nginx
+docker compose logs -f 3x-ui
 ```
 
-### Просмотр логов
+## Бэкап
+
 ```bash
-docker compose logs -f
+# Бэкап базы данных
+cp -r data/ backup-$(date +%Y%m%d)/
+
+# Восстановление
+docker compose down
+cp -r backup-YYYYMMDD/ data/
+docker compose up -d
 ```
 
-## Автоматическое обновление сертификатов
+## Troubleshooting
 
-Certbot автоматически проверяет и обновляет сертификаты каждые 12 часов. После обновления nginx автоматически подхватит новые сертификаты.
+### Проверка портов
+```bash
+docker compose ps
+netstat -tulpn | grep -E ':(80|443|8080)'
+```
 
-## Порты
+### Проверка сертификатов
+```bash
+ls -la $SSL_CERTS_PATH
+```
 
-| Сервис | Порт | Описание |
-|--------|------|----------|
-| Nginx HTTP | 80 | Входящий HTTP + ACME challenge |
-| Nginx HTTPS | 443 | Входящий HTTPS |
-| 3X-UI WebUI | 2053 | Веб-интерфейс (host network) |
-| 3X-UI TLS | 443 | TLS трафик (host network) |
-| 3X-UI XHTTP | 80 | XHTTP трафик (host network) |
+### Тест конфигурации nginx
+```bash
+docker compose exec nginx nginx -t
+```
+
+### Перезагрузка nginx без даунтайма
+```bash
+docker compose exec nginx nginx -s reload
+```

@@ -1,21 +1,4 @@
-# Environment variables
 .env
-.env.local
-
-# Database
 data/
-*.db
-*.db-shm
-*.db-wal
-
-# SSL certificates
 certs/
-*.pem
-*.key
-*.crt
-
-# Nginx logs
-logs/
-
-# Docker
-.docker/
+*.log
