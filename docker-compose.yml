@@ -3,7 +3,6 @@ services:
     image: ${XUI_IMAGE:-ghcr.io/mhsanaei/3x-ui:v2.8.9}
     container_name: 3x-ui
     restart: unless-stopped
-    network_mode: host
     volumes:
 #      - ${XUI_DB_PATH:-./data/x-ui.db}:/etc/x-ui/x-ui.db
       # SSL certificates (uncomment for production)
