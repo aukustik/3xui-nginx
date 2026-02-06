@@ -15,7 +15,7 @@ ACME_HOME="$CERTS_DIR/acme.sh"
 echo "Renewing certificate for domain: $DOMAIN"
 
 # Renew certificate
-"$ACME_HOME/acme.sh" --renew -d $DOMAIN --force
+"$ACME_HOME/acme.sh" --renew -d $DOMAIN --force --home "$ACME_HOME"
 
 # Update symlinks
 mkdir -p "$CERTS_DIR/live/$DOMAIN"

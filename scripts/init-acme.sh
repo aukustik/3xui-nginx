@@ -26,18 +26,16 @@ mkdir -p "$CERTS_DIR" "$WEBROOT"
 # Install acme.sh if not present
 if [ ! -f "$ACME_HOME/acme.sh" ]; then
     echo "Installing acme.sh..."
-    curl https://get.acme.sh | sh -s email=$EMAIL
+    curl https://get.acme.sh | sh -s email=$EMAIL --force
 fi
-
-# Export acme.sh path
-export "$ACME_HOME/acme.sh"
 
 # Request certificate
 "$ACME_HOME/acme.sh" --issue \
     -d $DOMAIN \
     --webroot $WEBROOT \
     --server $ACME_SERVER \
-    --accountemail $EMAIL
+    --accountemail $EMAIL \
+    --home "$ACME_HOME"
 
 # Create symlinks for nginx (fullchain.pem, privkey.pem)
 mkdir -p "$CERTS_DIR/live/$DOMAIN"
