@@ -33,10 +33,10 @@ if [ ! -f "$ACME_HOME/acme.sh" ]; then
     fi
 fi
 
-# Request certificate
+# Request certificate (standalone mode - acme.sh runs its own web server)
 "$ACME_HOME/acme.sh" --issue \
     -d $DOMAIN \
-    --webroot $WEBROOT \
+    --standalone \
     --server $ACME_SERVER \
     --accountemail $EMAIL \
     --home "$ACME_HOME"
