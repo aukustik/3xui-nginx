@@ -13,7 +13,7 @@ EMAIL=${CERTBOT_EMAIL:-admin@example.com}
 
 echo "Requesting certificate for domain: $DOMAIN"
 
-docker-compose run --rm certbot certonly \
+docker compose run --rm certbot certonly \
     --webroot \
     --webroot-path /var/www/certbot \
     --email $EMAIL \
@@ -23,4 +23,4 @@ docker-compose run --rm certbot certonly \
 
 echo "Certificate obtained successfully!"
 echo "Now update your nginx config to use SSL and restart:"
-echo "docker-compose restart nginx"
+echo "docker compose restart nginx"

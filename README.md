@@ -29,7 +29,7 @@ CERTBOT_DOMAIN=your-domain.com
 
 ### 2. Запуск
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 3. Получение SSL сертификата
@@ -45,17 +45,17 @@ sed -i 's/example.com/your-domain.com/g' conf.d/3x-ui.conf
 
 ### 5. Перезапуск nginx
 ```bash
-docker-compose restart nginx
+docker compose restart nginx
 ```
 
 ### Остановка
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Просмотр логов
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 
 ## Автоматическое обновление сертификатов
