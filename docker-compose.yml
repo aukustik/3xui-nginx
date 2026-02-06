@@ -11,7 +11,7 @@ services:
       - "80"
     volumes:
       - ./data:/etc/x-ui
-      - ${SSL_CERTS_PATH}:/etc/x-ui/certs:ro
+      - ${SSL_CERTS_PATH}:/root/cert:ro
 
   nginx:
     image: ${NGINX_IMAGE:-nginx:alpine}
@@ -26,7 +26,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./conf.d:/etc/nginx/conf.d:ro
-      - ${SSL_CERTS_PATH}:/etc/ssl/certs:ro
+      - ${SSL_CERTS_PATH}:/root/cert:ro
     depends_on:
       - 3x-ui
 
