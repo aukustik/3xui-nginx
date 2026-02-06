@@ -12,8 +12,9 @@ DOMAIN=${CERTBOT_DOMAIN:-example.com}
 EMAIL=${CERTBOT_EMAIL:-admin@example.com}
 
 echo "Requesting certificate for domain: $DOMAIN"
+echo "Make sure nginx is running and serving ACME challenges on port 80"
 
-docker compose run --rm -p 80:80 certbot certonly \
+docker compose run --rm --entrypoint "" -p 80:80 certbot certonly \
     --webroot \
     --webroot-path /var/www/certbot \
     --email $EMAIL \

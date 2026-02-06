@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   3x-ui:
     image: ${XUI_IMAGE:-ghcr.io/mhsanaei/3x-ui:v2.8.9}
