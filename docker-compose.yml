@@ -21,7 +21,7 @@ services:
     volumes:
       - ${NGINX_CONF_PATH:-./nginx.conf}:/etc/nginx/nginx.conf:ro
       - ${NGINX_CONFD_PATH:-./conf.d}:/etc/nginx/conf.d:ro
-      - ${SSL_CERTS_PATH:-./certs}:/etc/letsencrypt:ro
+      - ${SSL_CERTS_PATH:-./certs}:/etc/nginx/certs:ro
       - ${SSL_CERTS_PATH:-./certs}/webroot:/var/www/certbot:ro
     depends_on:
       - 3x-ui
