@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     network_mode: host
     volumes:
-      - ${XUI_DB_PATH:-./data/x-ui.db}:/etc/x-ui/x-ui.db
+#      - ${XUI_DB_PATH:-./data/x-ui.db}:/etc/x-ui/x-ui.db
       # SSL certificates (uncomment for production)
-      # - ${SSL_CERTS_PATH:-./certs}:/etc/x-ui/certs:ro
+      - ${SSL_CERTS_PATH:-./certs}:/etc/x-ui/certs:ro
     environment:
       - XUI_DB_PATH=/etc/x-ui/x-ui.db
 
