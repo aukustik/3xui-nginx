@@ -27,6 +27,10 @@ mkdir -p "$CERTS_DIR" "$WEBROOT"
 if [ ! -f "$ACME_HOME/acme.sh" ]; then
     echo "Installing acme.sh..."
     curl https://get.acme.sh | sh -s email=$EMAIL --force
+    # Copy installed acme.sh to our directory
+    if [ -f ~/.acme.sh/acme.sh ]; then
+        cp -r ~/.acme.sh "$ACME_HOME"
+    fi
 fi
 
 # Request certificate
