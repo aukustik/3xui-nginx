@@ -26,11 +26,13 @@ services:
     depends_on:
       - 3x-ui
 
-  certbot:
-    image: certbot/certbot:latest
-    container_name: certbot
+  acme:
+    image: neilpang/acme.sh:latest
+    container_name: acme
     restart: unless-stopped
     volumes:
-      - ${SSL_CERTS_PATH:-./certs}:/etc/letsencrypt
+      - ${SSL_CERTS_PATH:-./certs}/acme.sh:/acme.sh
       - ${SSL_CERTS_PATH:-./certs}/webroot:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    environment:
+      - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do /acme.sh/acme.sh --cron --home /acme.sh; sleep 12h & wait $${!}; done;'"
