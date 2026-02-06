@@ -13,7 +13,7 @@ EMAIL=${CERTBOT_EMAIL:-admin@example.com}
 
 echo "Requesting certificate for domain: $DOMAIN"
 
-docker compose run --rm certbot certonly \
+docker compose run --rm -p 80:80 certbot certonly \
     --webroot \
     --webroot-path /var/www/certbot \
     --email $EMAIL \
