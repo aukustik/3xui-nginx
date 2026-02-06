@@ -4,7 +4,7 @@ services:
     container_name: 3x-ui
     restart: unless-stopped
     expose:
-      - "8080"  # WebUI
+      - "2053"  # WebUI
       - "443"   # TLS
       - "80"    # XHTTP
     volumes:
